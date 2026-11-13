@@ -432,7 +432,7 @@ async function fetchAPI(endpoint, options = {}) {
       localUrl: window.location.href,
       activeUrl: window.location.href,
       tunnel: { active: true, publicUrl: window.location.href, provider: 'GitHub Pages Web' },
-      qrCodeDataUrl: null
+      qrCodeDataUrl: './icons/qr_code.png'
     };
   }
 
