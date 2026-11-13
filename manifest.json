@@ -1,0 +1,18 @@
+{
+  "name": "Amazon Plus Gestão",
+  "short_name": "Amazon Plus",
+  "description": "Controle Integrado de Estoque André & Sheyla e Repasses",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#064e3b",
+  "theme_color": "#064e3b",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

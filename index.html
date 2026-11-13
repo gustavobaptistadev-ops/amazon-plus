@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Amazon Plus - Gestão de Estoques & Repasses</title>
+  
+  <!-- PWA & Mobile Meta Tags -->
+  <link rel="manifest" href="./manifest.json">
+  <meta name="theme-color" content="#064e3b">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Amazon Plus">
+  <link rel="apple-touch-icon" href="./icons/icon.svg">
+  <link rel="icon" type="image/svg+xml" href="./icons/icon.svg">
+
+  <!-- CSS -->
+  <link rel="stylesheet" href="./css/app.css">
+</head>
+<body>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-wrapper">
+        <img src="./icons/icon.svg" alt="Amazon Plus Logo" class="brand-logo">
+        <div>
+          <h1 class="brand-title">Amazon Plus</h1>
+          <p class="brand-subtitle">Estoque André & Sheyla</p>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="header-status-badge">
+          <span class="status-dot"></span>
+          <span>Online</span>
+        </div>
+        <button id="btnRefresh" class="btn-icon-header" title="Atualizar dados" aria-label="Atualizar dados">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Content Wrapper -->
+  <main class="app-container">
+
+    <!-- ========================================================
+         TAB 1: DASHBOARD / INÍCIO
+         ======================================================== -->
+    <section id="tabDashboard" class="tab-content active">
+      
+      <!-- Quick Sale CTA Banner -->
+      <button class="quick-sale-hero-btn" onclick="switchTab('tabSale')">
+        <div class="quick-sale-left">
+          <div class="quick-sale-icon">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>
+            </svg>
+          </div>
+          <div>
+            <div class="quick-sale-title">Lançar Nova Venda (1 a 1)</div>
+            <div class="quick-sale-subtitle">Baixa automática + Comprovante + Cálculo de Repasse</div>
+          </div>
+        </div>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+
+      <!-- Estoques Hero: André e Sheyla lado a lado -->
+      <div class="stocks-hero-grid">
+        <!-- Card Estoque André -->
+        <div class="stock-card andre">
+          <div class="stock-header">
+            <span class="stock-person-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Estoque André
+            </span>
+            <span id="andreStockStatus" class="stock-status-pill">Disponível</span>
+          </div>
+          <div class="stock-body">
+            <div class="stock-count-wrapper">
+              <span id="andreStockCount" class="stock-count">0</span>
+              <span class="stock-count-label">unidades</span>
+            </div>
+            <div class="stock-product-label">Produto: Amazon Plus</div>
+          </div>
+          <div class="stock-actions">
+            <button class="btn-stock-action" onclick="openStockAdjustModal('andre', 'entrada')">
+              <span style="color:#047857; font-weight:800;">+</span> Entrada
+            </button>
+            <button class="btn-stock-action" onclick="openLoanModal('andre', 'sheyla')">
+              <span>🔄</span> Emprestar
+            </button>
+          </div>
+        </div>
+
+        <!-- Card Estoque Sheyla (com 'y') -->
+        <div class="stock-card sheyla">
+          <div class="stock-header">
+            <span class="stock-person-badge">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              Estoque Sheyla
+            </span>
+            <span id="sheylaStockStatus" class="stock-status-pill">Disponível</span>
+          </div>
+          <div class="stock-body">
+            <div class="stock-count-wrapper">
+              <span id="sheylaStockCount" class="stock-count">0</span>
+              <span class="stock-count-label">unidades</span>
+            </div>
+            <div class="stock-product-label">Produto: Amazon Plus</div>
+          </div>
+          <div class="stock-actions">
+            <button class="btn-stock-action" onclick="openStockAdjustModal('sheyla', 'entrada')">
+              <span style="color:#7c3aed; font-weight:800;">+</span> Entrada
+            </button>
+            <button class="btn-stock-action" onclick="openLoanModal('sheyla', 'andre')">
+              <span>🔄</span> Emprestar
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Banner de Alerta de Empréstimo Interligado -->
+      <div id="loanInterlinkBanner" class="loan-interlink-card" style="display:none;">
+        <div class="loan-interlink-content">
+          <div class="loan-icon-box">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+            </svg>
+          </div>
+          <div>
+            <div id="loanInterlinkTitle" class="loan-text-title">Empréstimo Ativo</div>
+            <div id="loanInterlinkDesc" class="loan-text-desc">Sheyla possui unidades emprestadas de André.</div>
+          </div>
+        </div>
+        <button id="btnQuickReturnLoan" class="btn-loan-return" onclick="switchTab('tabStocks')">
+          Ver Empréstimos & Devolver
+        </button>
+      </div>
+
+      <!-- Resumo Financeiro & Repasse do Dia -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            Resumo Financeiro & Repasse
+          </h2>
+          <span style="font-size:0.75rem; color:var(--text-muted);">Padrão: R$ 270 (R$ 50 lucro | R$ 220 André)</span>
+        </div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Vendas Hoje</div>
+            <div id="dashTodayUnits" class="kpi-value">0 un.</div>
+            <div id="dashTodayGross" class="kpi-footnote">R$ 0,00 faturado</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Lucro Hoje</div>
+            <div id="dashTodayProfit" class="kpi-value green">R$ 0,00</div>
+            <div class="kpi-footnote">R$ 50 por frasco</div>
+          </div>
+          <div class="kpi-card highlight-repasse">
+            <div class="kpi-label" style="color:var(--gold-primary);">Repasse Pendente André</div>
+            <div id="dashPendingRepasse" class="kpi-value gold">R$ 0,00</div>
+            <div id="dashPendingUnits" class="kpi-footnote">0 unidades pendentes</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Total Já Quitado</div>
+            <div id="dashSettledRepasse" class="kpi-value">R$ 0,00</div>
+            <div id="dashSettledUnits" class="kpi-footnote">0 un. repassadas</div>
+          </div>
+        </div>
+
+        <div style="display:flex; justify-content:flex-end;">
+          <button class="btn-gold" onclick="switchTab('tabRepasse')">
+            <span>💸</span> Ver Extrato de Repasse do André
+          </button>
+        </div>
+      </div>
+
+      <!-- Últimas Vendas Recentes -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Últimas Vendas Registradas
+          </h2>
+          <button class="btn-secondary" style="padding:6px 12px; font-size:0.78rem;" onclick="switchTab('tabSales')">Ver Todas</button>
+        </div>
+        <div id="dashRecentSalesFeed" class="feed-list">
+          <div style="text-align:center; padding:24px; color:var(--text-muted);">Nenhuma venda registrada ainda. Clique em "Lançar Nova Venda"!</div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ========================================================
+         TAB 2: ESTOQUES & EMPRÉSTIMOS
+         ======================================================== -->
+    <section id="tabStocks" class="tab-content">
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            Gestão Integrada de Estoques
+          </h2>
+          <div style="display:flex; gap:8px;">
+            <button class="btn-secondary" style="font-size:0.8rem; padding:8px 12px;" onclick="openStockAdjustModal('andre', 'entrada')">+ Entrada André</button>
+            <button class="btn-secondary" style="font-size:0.8rem; padding:8px 12px;" onclick="openStockAdjustModal('sheyla', 'entrada')">+ Entrada Sheyla</button>
+          </div>
+        </div>
+
+        <!-- Visão detalhada de Saldos -->
+        <div class="stocks-hero-grid">
+          <div class="stock-card andre">
+            <div class="stock-header">
+              <span class="stock-person-badge">Estoque André</span>
+              <span id="andreDetailedStatus" class="stock-status-pill">Normal</span>
+            </div>
+            <div class="stock-body">
+              <div class="stock-count-wrapper">
+                <span id="andreDetailedCount" class="stock-count">0</span>
+                <span class="stock-count-label">frascos</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-stock-action" style="flex:1;" onclick="openStockAdjustModal('andre', 'entrada')">+ Entrada</button>
+              <button class="btn-stock-action" style="flex:1;" onclick="openStockAdjustModal('andre', 'saida_manual')">- Ajuste / Baixa</button>
+            </div>
+          </div>
+
+          <div class="stock-card sheyla">
+            <div class="stock-header">
+              <span class="stock-person-badge">Estoque Sheyla</span>
+              <span id="sheylaDetailedStatus" class="stock-status-pill">Normal</span>
+            </div>
+            <div class="stock-body">
+              <div class="stock-count-wrapper">
+                <span id="sheylaDetailedCount" class="stock-count">0</span>
+                <span class="stock-count-label">frascos</span>
+              </div>
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button class="btn-stock-action" style="flex:1;" onclick="openStockAdjustModal('sheyla', 'entrada')">+ Entrada</button>
+              <button class="btn-stock-action" style="flex:1;" onclick="openStockAdjustModal('sheyla', 'saida_manual')">- Ajuste / Baixa</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Seção: Empréstimos entre André e Sheyla -->
+      <div class="card">
+        <div class="card-title-row">
+          <div>
+            <h2 class="card-title">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--gold-primary)" stroke-width="2.2"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg>
+              Empréstimos entre André e Sheyla
+            </h2>
+            <p style="font-size:0.78rem; color:var(--text-muted); margin-top:2px;">Controle facilitado de quem emprestou para quem e devoluções</p>
+          </div>
+          <button class="btn-gold" style="padding:8px 14px; font-size:0.82rem;" onclick="openLoanModal()">
+            <span>🔄</span> Registrar Empréstimo
+          </button>
+        </div>
+
+        <!-- Balanço Líquido Atual -->
+        <div id="loansBalanceSummaryBox" style="background:#f8fafc; border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:14px; margin-bottom:16px;">
+          Carregando balanço de empréstimos...
+        </div>
+
+        <!-- Lista de Empréstimos -->
+        <h3 style="font-size:0.9rem; font-weight:700; margin-bottom:10px; color:var(--text-main);">Histórico de Empréstimos & Status de Devolução</h3>
+        <div id="loansListFeed" class="feed-list">
+          <!-- Injetado dinamicamente -->
+        </div>
+      </div>
+
+      <!-- Seção: Histórico de Movimentações -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">Histórico de Movimentações (Entradas, Saídas e Ajustes)</h2>
+        </div>
+        <div id="movementsListFeed" class="feed-list">
+          <!-- Injetado dinamicamente -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         TAB 3: NOVA VENDA (1 A 1 COM COMPROVANTE)
+         ======================================================== -->
+    <section id="tabSale" class="tab-content">
+      <div class="card">
+        <div class="card-title-row">
+          <div>
+            <h2 class="card-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+              Lançamento de Venda - Amazon Plus
+            </h2>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+              Lançamento unitário com baixa automática no estoque e geração de repasse.
+            </p>
+          </div>
+        </div>
+
+        <form id="saleForm" onsubmit="handleSaleSubmit(event)">
+          
+          <!-- Passo 1: Seleção de Estoque (André ou Sheyla) -->
+          <div class="form-group">
+            <label class="form-label">
+              1. De qual estoque saiu a venda? <span style="color:var(--danger)">*</span>
+              <span class="form-label-desc">(Selecione André ou Sheyla)</span>
+            </label>
+            <div class="stock-selector-grid">
+              <!-- André Radio -->
+              <label class="stock-radio-card">
+                <input type="radio" name="sale_stock_id" value="andre" checked onchange="updateSaleBreakdown()">
+                <div class="stock-radio-content andre-selector">
+                  <div class="selector-avatar">A</div>
+                  <div class="selector-name">Estoque André</div>
+                  <div id="saleSelectAndreBalance" class="selector-balance">Saldo: 0 un.</div>
+                </div>
+              </label>
+
+              <!-- Sheyla Radio (com 'y') -->
+              <label class="stock-radio-card">
+                <input type="radio" name="sale_stock_id" value="sheyla" onchange="updateSaleBreakdown()">
+                <div class="stock-radio-content sheyla-selector">
+                  <div class="selector-avatar">S</div>
+                  <div class="selector-name">Estoque Sheyla</div>
+                  <div id="saleSelectSheylaBalance" class="selector-balance">Saldo: 0 un.</div>
+                </div>
+              </label>
+            </div>
+          </div>
+
+          <!-- Passo 2: Quantidade de Frascos (Padrão 1 por 1) -->
+          <div class="form-group">
+            <label class="form-label">
+              2. Quantidade de frascos <span class="form-label-desc">(Padrão: 1 unidade por vez)</span>
+            </label>
+            <div class="quantity-stepper">
+              <button type="button" class="btn-stepper" onclick="stepSaleQty(-1)">-</button>
+              <input type="number" id="saleQtyInput" class="stepper-input" value="1" min="1" max="999" onchange="updateSaleBreakdown()" required>
+              <button type="button" class="btn-stepper" onclick="stepSaleQty(1)">+</button>
+            </div>
+          </div>
+
+          <!-- Resumo de Valores e Repasse em Tempo Real -->
+          <div class="pricing-breakdown-box">
+            <div class="breakdown-row">
+              <span style="color:var(--text-muted);">Preço de Venda Padrão:</span>
+              <span id="breakdownPriceUnit">1x de R$ 270,00 = <strong>R$ 270,00</strong></span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-profit">Nosso Lucro Fixo (R$ 50/un):</span>
+              <span id="breakdownProfitTotal" class="breakdown-profit">+ R$ 50,00</span>
+            </div>
+            <div class="breakdown-row">
+              <span class="breakdown-repasse">Repasse p/ André (R$ 220/un):</span>
+              <span id="breakdownRepasseTotal" class="breakdown-repasse">R$ 220,00</span>
+            </div>
+          </div>
+
+          <!-- Passo 3: Dados do Cliente e Pagamento -->
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="saleCustomerName">Nome do Cliente</label>
+              <input type="text" id="saleCustomerName" class="form-input" placeholder="Ex: Maria dos Santos" autocomplete="off">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="saleCustomerPhone">WhatsApp / Telefone</label>
+              <input type="tel" id="saleCustomerPhone" class="form-input" placeholder="(00) 00000-0000" autocomplete="off">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="salePaymentMethod">Forma de Pagamento</label>
+            <select id="salePaymentMethod" class="form-select">
+              <option value="PIX" selected>PIX</option>
+              <option value="Dinheiro">Dinheiro em Espécie</option>
+              <option value="Cartão de Crédito">Cartão de Crédito</option>
+              <option value="Cartão de Débito">Cartão de Débito</option>
+              <option value="Outro">Outro</option>
+            </select>
+          </div>
+
+          <!-- Passo 4: Anexo do Comprovante de Venda (Foto ou Arquivo) -->
+          <div class="form-group">
+            <label class="form-label">
+              Comprovante de Venda / PIX <span class="form-label-desc">(Foto da câmera ou print)</span>
+            </label>
+            
+            <div id="receiptDropZone" class="receipt-upload-zone" onclick="document.getElementById('saleReceiptInput').click()">
+              <svg class="receipt-upload-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+                <circle cx="12" cy="13" r="4"/>
+              </svg>
+              <div class="receipt-upload-title">Tirar Foto ou Anexar Imagem</div>
+              <div class="receipt-upload-sub">Clique aqui para abrir a câmera do celular ou escolher foto</div>
+            </div>
+
+            <!-- Input nativo de arquivo com suporte a câmera de smartphone -->
+            <input type="file" id="saleReceiptInput" accept="image/*,application/pdf" style="display:none;" onchange="handleReceiptFileSelect(this)">
+
+            <!-- Prévia do Comprovante selecionado -->
+            <div id="receiptPreviewBox" class="receipt-preview-container">
+              <img id="receiptPreviewImg" src="" alt="Prévia do Comprovante" class="receipt-preview-img">
+              <button type="button" class="btn-remove-receipt" onclick="removeReceiptFile(event)" title="Remover imagem">✕</button>
+            </div>
+          </div>
+
+          <!-- Observações adicionais -->
+          <div class="form-group">
+            <label class="form-label" for="saleNotes">Observações (opcional)</label>
+            <input type="text" id="saleNotes" class="form-input" placeholder="Ex: Entregue no centro / Pago no ato">
+          </div>
+
+          <!-- Botão de Gravar Venda -->
+          <button type="submit" id="btnSubmitSale" class="btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+            Confirmar Venda & Baixar Estoque
+          </button>
+        </form>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         TAB 4: HISTÓRICO DE VENDAS & COMPROVANTES
+         ======================================================== -->
+    <section id="tabSales" class="tab-content">
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            Histórico Completo de Vendas
+          </h2>
+          <button class="btn-gold" style="font-size:0.8rem; padding:8px 14px;" onclick="switchTab('tabSale')">+ Nova Venda</button>
+        </div>
+
+        <!-- Filtros Rápidos -->
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+          <div>
+            <label class="form-label" style="font-size:0.75rem;">Filtrar por Estoque:</label>
+            <select id="filterSalesStock" class="form-select" onchange="loadSalesList()">
+              <option value="">Todos os Estoques</option>
+              <option value="andre">Apenas André</option>
+              <option value="sheyla">Apenas Sheyla</option>
+            </select>
+          </div>
+          <div>
+            <label class="form-label" style="font-size:0.75rem;">Status do Repasse:</label>
+            <select id="filterSalesRepasse" class="form-select" onchange="loadSalesList()">
+              <option value="">Todos os Status</option>
+              <option value="pendente">Repasse Pendente</option>
+              <option value="liquidado">Já Repassado ao André</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Lista de Vendas -->
+        <div id="salesListContainer" class="feed-list">
+          <!-- Injetado dinamicamente -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         TAB 5: CONTROLE DE REPASSE AO ANDRÉ
+         ======================================================== -->
+    <section id="tabRepasse" class="tab-content">
+      <div class="card">
+        <div class="card-title-row">
+          <div>
+            <h2 class="card-title">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--gold-primary)" stroke-width="2.2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+              Controle de Repasse ao André
+            </h2>
+            <p style="font-size:0.8rem; color:var(--text-muted); margin-top:2px;">
+              Regra de negócio: R$ 270 venda - R$ 50 nosso lucro = <strong>R$ 220 a repassar por frasco</strong>.
+            </p>
+          </div>
+        </div>
+
+        <!-- Seletor de Período (Diário, Semanal, Quinzenal, Mensal) -->
+        <div class="pill-filter-bar">
+          <button class="pill-chip active" onclick="setRepassePeriod('todas', this)">🌐 Todas as Pendências</button>
+          <button class="pill-chip" onclick="setRepassePeriod('diario', this)">📅 Diário (Hoje)</button>
+          <button class="pill-chip" onclick="setRepassePeriod('semanal', this)">📆 Semanal (7 dias)</button>
+          <button class="pill-chip" onclick="setRepassePeriod('quinzenal', this)">🌓 Quinzenal (15 dias)</button>
+          <button class="pill-chip" onclick="setRepassePeriod('mensal', this)">🗓️ Mensal (Este Mês)</button>
+        </div>
+
+        <!-- Resumo Consolidado do Período -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-label">Frascos a Repassar</div>
+            <div id="repasseUnitsPeriod" class="kpi-value">0 un.</div>
+            <div class="kpi-footnote">pendentes no filtro</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Faturamento Bruto</div>
+            <div id="repasseGrossPeriod" class="kpi-value">R$ 0,00</div>
+            <div class="kpi-footnote">R$ 270 por frasco</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-label">Nosso Lucro Retido</div>
+            <div id="repasseProfitPeriod" class="kpi-value green">R$ 0,00</div>
+            <div class="kpi-footnote">R$ 50 por frasco</div>
+          </div>
+          <div class="kpi-card highlight-repasse">
+            <div class="kpi-label" style="color:var(--gold-primary);">VALOR TOTAL DO REPASSE</div>
+            <div id="repasseTotalPeriod" class="kpi-value gold">R$ 0,00</div>
+            <div class="kpi-footnote" style="color:#78350f; font-weight:700;">A transferir para o André</div>
+          </div>
+        </div>
+
+        <!-- Ação de Fechamento -->
+        <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:var(--radius-md); padding:16px; margin-bottom:20px; display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+          <div>
+            <div style="font-weight:800; color:#78350f; font-size:0.95rem;">Pronto para fazer o acerto?</div>
+            <div style="font-size:0.8rem; color:#92400e;">Faça o PIX para o André, anexe o comprovante e gere o recibo para o WhatsApp.</div>
+          </div>
+          <button id="btnOpenSettlementModal" class="btn-gold" onclick="openSettlementModal()">
+            <span>🤝</span> Realizar Fechamento com André
+          </button>
+        </div>
+
+        <!-- Tabela das Vendas Pendentes no Período -->
+        <h3 style="font-size:0.92rem; font-weight:700; margin-bottom:12px;">Vendas Pendentes de Repasse no Período</h3>
+        <div id="repassePendingSalesFeed" class="feed-list">
+          <!-- Injetado dinamicamente -->
+        </div>
+      </div>
+
+      <!-- Histórico de Fechamentos Realizados -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">Histórico de Fechamentos Já Realizados</h2>
+        </div>
+        <div id="settlementsHistoryFeed" class="feed-list">
+          <!-- Injetado dinamicamente -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================================
+         TAB 6: CONECTAR CELULAR & CONFIGURAÇÕES
+         ======================================================== -->
+    <section id="tabConnect" class="tab-content">
+      <!-- Card Conexão Celular -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--color-primary)" stroke-width="2.2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+            Acesso Remoto no Celular (4G / 5G / Qualquer Rede)
+          </h2>
+          <span id="tunnelStatusBadge" class="stock-status-pill" style="background:#dcfce7; color:#15803d; font-weight:700;">
+            ● Túnel Web Ativo
+          </span>
+        </div>
+
+        <!-- Card de Conexão Web Pública (4G / 5G) -->
+        <div style="background:#f0fdf4; border:1.5px solid #86efac; border-radius:var(--radius-lg); padding:16px; margin-bottom:18px;">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; flex-wrap:wrap; margin-bottom:10px;">
+            <div style="font-weight:800; font-size:0.95rem; color:#14532d; display:flex; align-items:center; gap:6px;">
+              <span>🌐</span> Link de Acesso Público na Web
+            </div>
+            <div style="display:flex; gap:8px;">
+              <button id="btnToggleTunnel" class="btn-secondary" style="font-size:0.75rem; padding:5px 10px;" onclick="toggleTunnelAction()">
+                🔄 Reconectar Túnel
+              </button>
+            </div>
+          </div>
+          <p style="font-size:0.82rem; color:#166534; margin-bottom:12px;">
+            Este link funciona no <strong>4G ou em qualquer Wi-Fi</strong>. Envie este link para o <strong>André</strong> e para a <strong>Sheyla</strong> para abrirem no celular de qualquer lugar!
+          </p>
+
+          <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+            <div id="networkUrlDisplay" class="network-url-pill" style="margin-bottom:0; flex:1; min-width:240px; word-break:break-all;">
+              Carregando link seguro...
+            </div>
+            <button class="btn-primary" style="width:auto; padding:10px 18px; font-size:0.85rem;" onclick="copyWhatsappShareMessage()">
+              <span>📲</span> Mandar no WhatsApp de André e Sheyla
+            </button>
+          </div>
+        </div>
+
+        <div class="qr-card-center">
+          <p style="font-size:0.88rem; color:var(--text-muted); max-width:460px; margin-bottom:16px;">
+            Aponte a câmera do celular para o QR Code abaixo para abrir o sistema diretamente pelo 4G ou Wi-Fi:
+          </p>
+
+          <div class="qr-image-wrapper">
+            <img id="networkQrCodeImg" src="" alt="QR Code de Conexão" class="qr-image">
+          </div>
+
+          <div style="font-size:0.78rem; color:var(--text-muted); margin-top:4px;">
+            Servidor rodando no seu computador • Túnel seguro HTTPS ativo
+          </div>
+        </div>
+
+        <!-- Instruções iPhone e Android -->
+        <div style="border-top:1px solid var(--border-subtle); padding-top:18px; margin-top:16px;">
+          <h3 style="font-size:0.95rem; font-weight:800; color:var(--text-main); margin-bottom:12px;">Como instalar como Aplicativo no Celular:</h3>
+          
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+            <!-- iPhone -->
+            <div style="background:#f8fafc; border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:14px;">
+              <div style="font-weight:800; font-size:0.9rem; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                <span>🍏</span> No iPhone (Safari)
+              </div>
+              <ol class="instruction-steps">
+                <li>Abra o link acima no navegador <strong>Safari</strong>.</li>
+                <li>Toque no botão <strong>Compartilhar</strong> (ícone de quadrado com seta para cima).</li>
+                <li>Role para baixo e selecione <strong>"Adicionar à Tela de Início"</strong>.</li>
+                <li>Pronto! O ícone do Amazon Plus aparecerá junto aos seus aplicativos!</li>
+              </ol>
+            </div>
+
+            <!-- Android -->
+            <div style="background:#f8fafc; border:1px solid var(--border-subtle); border-radius:var(--radius-md); padding:14px;">
+              <div style="font-weight:800; font-size:0.9rem; color:var(--text-main); display:flex; align-items:center; gap:6px;">
+                <span>🤖</span> No Android (Chrome)
+              </div>
+              <ol class="instruction-steps">
+                <li>Abra o link no navegador <strong>Google Chrome</strong>.</li>
+                <li>Toque no menu de <strong>três pontinhos (⋮)</strong> no topo.</li>
+                <li>Selecione <strong>"Instalar aplicativo"</strong> ou "Adicionar à tela inicial".</li>
+                <li>Toque em confirmar e o app abrirá em tela cheia como nativo!</li>
+              </ol>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Configurações do Sistema & PIX do André -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">Configurações & Chave PIX do André</h2>
+        </div>
+
+        <form onsubmit="handleSaveSettings(event)">
+          <div class="form-group">
+            <label class="form-label" for="cfgAndrePix">Chave PIX do André (para facilitar na hora do repasse)</label>
+            <input type="text" id="cfgAndrePix" class="form-input" placeholder="Ex: andre@email.com ou telefone/CPF">
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+            <div class="form-group">
+              <label class="form-label" for="cfgUnitPrice">Preço Padrão (R$)</label>
+              <input type="number" step="0.01" id="cfgUnitPrice" class="form-input" value="270.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="cfgUnitProfit">Nosso Lucro Padrão (R$)</label>
+              <input type="number" step="0.01" id="cfgUnitProfit" class="form-input" value="50.00">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Repasse André (R$)</label>
+              <input type="text" id="cfgUnitRepasseDisplay" class="form-input" value="R$ 220,00" disabled style="background:#f1f5f9; font-weight:700;">
+            </div>
+          </div>
+
+          <button type="submit" class="btn-primary" style="padding:12px;">Salvar Configurações</button>
+        </form>
+      </div>
+
+      <!-- Backup de Dados -->
+      <div class="card">
+        <div class="card-title-row">
+          <h2 class="card-title">Backup & Segurança dos Dados</h2>
+        </div>
+        <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:14px;">
+          Todos os lançamentos, fotos de comprovantes e estoques ficam salvos no seu computador. Faça um backup em arquivo sempre que quiser.
+        </p>
+        <div style="display:flex; gap:10px;">
+          <a href="/api/backup" download class="btn-secondary" style="text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+            <span>💾</span> Baixar Backup Completo (JSON)
+          </a>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ========================================================
+       MOBILE BOTTOM NAVIGATION
+       ======================================================== -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="tabDashboard" onclick="switchTab('tabDashboard')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Início</span>
+    </button>
+    <button class="nav-item" data-tab="tabStocks" onclick="switchTab('tabStocks')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+      <span>Estoques</span>
+    </button>
+    <button class="nav-item active-sale" data-tab="tabSale" onclick="switchTab('tabSale')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>
+      <span>+ Venda</span>
+    </button>
+    <button class="nav-item" data-tab="tabSales" onclick="switchTab('tabSales')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+      <span>Vendas</span>
+    </button>
+    <button class="nav-item" data-tab="tabRepasse" onclick="switchTab('tabRepasse')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+      <span>Repasse</span>
+    </button>
+    <button class="nav-item" data-tab="tabConnect" onclick="switchTab('tabConnect')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+      <span>Celular</span>
+    </button>
+  </nav>
+
+  <!-- ========================================================
+       MODAIS
+       ======================================================== -->
+
+  <!-- Modal 1: Ajuste / Entrada de Estoque -->
+  <div id="modalStockAdjust" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="modalStockAdjustTitle" class="modal-title">Entrada de Estoque</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalStockAdjust')">✕</button>
+      </div>
+      <form onsubmit="handleStockAdjustSubmit(event)">
+        <input type="hidden" id="adjustStockId">
+        <input type="hidden" id="adjustMovementType">
+        
+        <div class="form-group">
+          <label class="form-label" id="adjustStockPersonLabel">Estoque Selecionado: André</label>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="adjustQuantity">Quantidade de frascos <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="adjustQuantity" class="form-input" min="1" value="10" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="adjustNotes">Motivo / Observações</label>
+          <input type="text" id="adjustNotes" class="form-input" placeholder="Ex: Reposição de estoque / Recebimento lote">
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" class="btn-secondary" style="flex:1;" onclick="closeModal('modalStockAdjust')">Cancelar</button>
+          <button type="submit" class="btn-primary" style="flex:1;" id="btnSubmitStockAdjust">Confirmar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 2: Registrar Empréstimo André <-> Sheyla -->
+  <div id="modalLoan" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Registrar Empréstimo de Frascos</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalLoan')">✕</button>
+      </div>
+      <form onsubmit="handleLoanSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" for="loanLender">Quem está emprestando? (Origem)</label>
+          <select id="loanLender" class="form-select" onchange="syncLoanBorrower()">
+            <option value="andre">André</option>
+            <option value="sheyla">Sheyla</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loanBorrower">Quem está pegando emprestado? (Destino)</label>
+          <select id="loanBorrower" class="form-select" disabled style="background:#f1f5f9;">
+            <option value="sheyla">Sheyla</option>
+            <option value="andre">André</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loanQuantity">Quantidade de frascos a emprestar <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="loanQuantity" class="form-input" min="1" value="1" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="loanNotes">Observações</label>
+          <input type="text" id="loanNotes" class="form-input" placeholder="Ex: Para atender cliente urgente na região X">
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" class="btn-secondary" style="flex:1;" onclick="closeModal('modalLoan')">Cancelar</button>
+          <button type="submit" class="btn-gold" style="flex:1;">Confirmar Empréstimo</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 3: Devolver Empréstimo -->
+  <div id="modalReturnLoan" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Registrar Devolução de Frascos</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalReturnLoan')">✕</button>
+      </div>
+      <form onsubmit="handleReturnLoanSubmit(event)">
+        <input type="hidden" id="returnLoanId">
+        
+        <div class="form-group">
+          <div id="returnLoanDesc" style="background:#f8fafc; padding:12px; border-radius:var(--radius-md); font-size:0.9rem; line-height:1.4;">
+            Sheyla devolvendo para André
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="returnQuantity">Quantidade de frascos a devolver <span style="color:var(--danger)">*</span></label>
+          <input type="number" id="returnQuantity" class="form-input" min="1" value="1" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="returnNotes">Observações</label>
+          <input type="text" id="returnNotes" class="form-input" placeholder="Ex: Devolução em mãos">
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" class="btn-secondary" style="flex:1;" onclick="closeModal('modalReturnLoan')">Cancelar</button>
+          <button type="submit" class="btn-primary" style="flex:1;">Confirmar Devolução</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 4: Fechamento de Repasse com André -->
+  <div id="modalSettlement" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Fechamento de Repasse com André</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalSettlement')">✕</button>
+      </div>
+      <form onsubmit="handleSettlementSubmit(event)">
+        
+        <div style="background:#fffbeb; border:1px solid #fde68a; border-radius:var(--radius-md); padding:16px; margin-bottom:16px;">
+          <div style="font-size:0.85rem; color:#78350f;">Total a Repassar:</div>
+          <div id="modalSettlementTotal" style="font-size:1.8rem; font-weight:900; color:#b45309;">R$ 0,00</div>
+          <div id="modalSettlementUnits" style="font-size:0.82rem; color:#92400e;">Referente a 0 frascos vendidos</div>
+        </div>
+
+        <!-- Chave PIX do André com botão de cópia rápida -->
+        <div class="form-group">
+          <label class="form-label">Chave PIX do André</label>
+          <div style="display:flex; gap:8px;">
+            <input type="text" id="settlementPixDisplay" class="form-input" readonly value="andre@email.com">
+            <button type="button" class="btn-secondary" onclick="copyAndrePixKey()">Copiar</button>
+          </div>
+        </div>
+
+        <!-- Anexo do Comprovante do PIX de Repasse -->
+        <div class="form-group">
+          <label class="form-label">Comprovante do PIX feito ao André (opcional)</label>
+          <input type="file" id="settlementReceiptInput" class="form-input" accept="image/*,application/pdf">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="settlementNotes">Observação do Fechamento</label>
+          <input type="text" id="settlementNotes" class="form-input" placeholder="Ex: Fechamento semanal / PIX realizado">
+        </div>
+
+        <div style="display:flex; gap:10px; margin-top:20px;">
+          <button type="button" class="btn-secondary" style="flex:1;" onclick="closeModal('modalSettlement')">Cancelar</button>
+          <button type="submit" class="btn-gold" style="flex:1;" id="btnConfirmSettlement">Confirmar Repasse Feito</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal 5: Recibo de Fechamento / Compartilhar WhatsApp -->
+  <div id="modalReceiptView" class="modal-overlay">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">Recibo de Acerto com André</h3>
+        <button class="btn-close-modal" onclick="closeModal('modalReceiptView')">✕</button>
+      </div>
+
+      <div id="whatsappReceiptText" class="whatsapp-receipt-box"></div>
+
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <button class="btn-primary" onclick="copyWhatsappText()">
+          <span>📲</span> Copiar Mensagem para WhatsApp do André
+        </button>
+        <button class="btn-secondary" onclick="closeModal('modalReceiptView')">Fechar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox Overlay (Visualizador de Comprovantes com Zoom) -->
+  <div id="lightboxOverlay" class="lightbox-overlay" onclick="closeLightbox()">
+    <button class="lightbox-close-btn" onclick="closeLightbox()">✕</button>
+    <img id="lightboxImg" src="" alt="Comprovante de Venda em Alta Resolução" class="lightbox-img" onclick="event.stopPropagation()">
+  </div>
+
+  <!-- Scripts -->
+  <script src="./js/app.js"></script>
+</body>
+</html>
